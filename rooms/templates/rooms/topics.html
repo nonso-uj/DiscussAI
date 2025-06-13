@@ -1,0 +1,50 @@
+{% extends 'base/base.html' %}
+
+
+
+{% block content %}
+
+<main class="update-account layout">
+    <div class="container">
+        <div class="layout__box">
+            <div class="layout__body">
+
+                <div class="topics__header">
+                    <h2 class="room__topLeft">
+                        <a href="{% url 'home' %}" style="margin-right: 5rem;">
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                            <title>arrow-left</title>
+                            <path
+                                d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"
+                            ></path>
+                            </svg>
+                            Home
+                        </a>
+                        Browse Topics
+                    </h2>
+                </div>
+
+                <ul class="topics__list">
+                    <li>
+                        <a href="{% url 'home' %}" class="active">
+                            All <span>{{ room_count }}</span>
+                        </a>
+                    </li>
+
+                    {% for topic in topics %}
+
+                    <li>
+                        <a href="{% url 'home'%}?q={{topic.title}}">
+                            {{ topic.title }} <span>{{ topic.room_set.all.count }}</span>
+                        </a>
+                    </li>
+
+                    {% endfor %}
+                
+                </ul>
+    
+            </div>
+        </div>
+    </div>
+</main>
+  {% endblock %}

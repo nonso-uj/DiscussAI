@@ -1,0 +1,63 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+  <main class="profile-page layout layout--3">
+    <div class="container">
+      <!-- Topics Start -->
+      {% include 'rooms/topics_component.html'%}
+      <!-- Topics End -->
+
+      <!-- Room List Start -->
+      <div class="roomList">
+        <div class="profile">
+          <div class="profile__avatar">
+            <div class="avatar avatar--large active">
+              {% if user.profile.profile_pic.url %}
+                <img src="{{user.profile.profile_pic.url}}" />
+              {% else %}
+                <img src="{% static 'base/assets/avatar.svg' %}" />
+              {% endif %}
+            </div>
+          </div>
+          <div class="profile__info">
+            <h3>{{user.first_name|title}}</h3>
+            <p>@{{user.first_name}}</p>
+            <a href="{% url 'user-edit' %}" class="btn btn--main btn--pill">Edit Profile</a>
+          </div>
+          <div class="profile__about">
+            <h3>About</h3>
+            <p>
+              {{user.profile.about}}
+            </p>
+          </div>
+        </div>
+
+        <div class="roomList__header">
+          <div>
+            <h2>Chat Rooms Hosted by {{user.full_name}}</a>
+            </h2>
+          </div>
+        </div>
+        
+        <!-- include -->
+        {% include 'rooms/rooms_component.html' %}
+
+      </div>
+
+
+      <!-- Room List End -->
+
+      <!-- Activities Start -->
+      {% include 'rooms/messages_component.html' %}
+      <!-- Activities End -->
+
+
+    </div>
+  </main>
+
+
+{% endblock %}
