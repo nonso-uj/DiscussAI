@@ -1,5 +1,7 @@
 # **Chatrooms (Discord Clone)**
 
+Chatrooms is a full-stack web application that replicates Discord's core functionality, allowing users to create dedicated servers, join real-time chat channels, and communicate with other members. Built with Django for backend logic and PostgreSQL for data persistence, the application features a containerized architecture using Docker for consistent development and deployment. The project demonstrates user authentication systems, database management, environment configuration, and production-ready implementation with Gunicorn and Whitenoise for static file serving.
+
 ### **1. Cloning the Repository**
 ```bash
 git clone https://github.com/nonso-uj/chatrooms-discord-clone.git
