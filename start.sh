@@ -12,4 +12,4 @@ python manage.py migrate
 
 # Start Gunicorn
 echo "Starting server..."
-gunicorn your_project.wsgi:application --bind 0.0.0.0:8000 --workers 4
+gunicorn chatrooms.wsgi:application --bind 0.0.0.0:8000 --workers 4
