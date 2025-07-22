@@ -66,4 +66,16 @@ if (photoInput)
 
 // Scroll to Bottom
 const conversationThread = document.querySelector(".room__box");
-if (conversationThread) conversationThread.scrollTop = conversationThread.scrollHeight;
+if (conversationThread)
+  conversationThread.scrollTop = conversationThread.scrollHeight;
+
+
+const chat = document.getElementById('room__box');
+function scrollToBottom(){
+  chat.scrollTop = chat.scrollHeight;
+  console.log('first===', chat.scrollHeight)
+}
+
+// Scroll on initial load
+scrollToBottom();
+

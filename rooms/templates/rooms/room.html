@@ -6,7 +6,7 @@
 
 
     <main class="profile-page layout layout--2">
-      <div class="container">
+      <div class="container" style="margin-bottom: 5rem;">
         <!-- Room Start -->
         <div class="room">
           <div class="room__top">
@@ -19,7 +19,7 @@
                   ></path>
                 </svg>
               </a>
-              <h3>Chat Room</h3>
+              <h3>Discussion Room</h3>
             </div>
 
             <div class="room__topRight">
@@ -89,7 +89,7 @@
               <span class="room__topics">{{ room.topic }}</span>
             </div>
             <div class="room__conversation">
-              <div class="threads scroll">
+              <div id="room__box" class="threads scroll" style="height:400px; overflow-y:auto; margin-bottom: 50px;">
                 {% if msgs %}
 
                 {% for msg in msgs %}
@@ -138,6 +138,7 @@
             <form action="" method="POST">
               {% csrf_token %}
               <input name="msg" placeholder="Write your message here..." />
+              <button type="submit">send</button>
             </form>
           </div>
         </div>

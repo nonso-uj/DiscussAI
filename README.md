@@ -1,4 +1,4 @@
-# **Chatrooms (Discord Clone)**
+# **DiscussAI (Discord Clone)**
 
 ### **1. Cloning the Repository**
 ```bash

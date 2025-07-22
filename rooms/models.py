@@ -33,3 +33,12 @@ class Message(models.Model):
 
     def __str__(self):
         return self.content
+
+class Summary(models.Model):
+    chatroom = models.ForeignKey(Room, on_delete=models.CASCADE)
+    content = models.TextField()
+    checks = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.content

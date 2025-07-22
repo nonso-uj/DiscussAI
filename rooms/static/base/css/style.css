@@ -17,8 +17,8 @@
 /*========== base styles ==========*/
 
 * {
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -1107,20 +1107,42 @@ a {
   background: transparent;
 }
 
+.room__message > form {
+  display: flex;
+  flex-direction: row;
+  justify-content: between;
+  align-items: stretch;
+  row-gap: 5px;
+}
+
+.room__message > form > button {
+  color: var(--color-light-gray);
+  border-style: none;
+  /* border-radius: 8px; */
+  background-color: var(--color-dark-medium);
+  margin-top: -1rem;
+  padding: 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 .room__message > form > input {
   resize: none;
   background-color: var(--color-dark-light);
   color: var(--color-light);
   border: none;
   outline: none;
-  border-radius: 0.7rem;
+  /* border-radius: 0.7rem; */
   height: 4.5rem;
-  width: 100%;
+  width: auto;
+  min-width: 80%;
   margin-top: -1rem;
   padding: 1.2rem;
   font-size: 1.4rem;
   font-weight: 500;
   position: relative;
+  flex-grow: 1;
 }
 
 .room__message > form > input::placeholder {
@@ -1164,9 +1186,7 @@ a {
   font-weight: 1.4rem;
 }
 
-
-
-.pagination{
+.pagination {
   width: 100%;
   padding: 0%;
   text-align: center;

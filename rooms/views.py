@@ -3,10 +3,82 @@ from django.db.models import Q
 from django.urls import reverse
 from django.contrib import messages
 from django.core.paginator import Paginator
+from decouple import config
+from transformers import pipeline, AutoTokenizer
+from huggingface_hub import InferenceClient
 
-from .models import Message, Topic, Room
+from .models import Message, Topic, Room, Summary
 from .forms import RoomForm
+from userapp.models import User
 # Create your views here.
+
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
+TRIGGER_WORD = '@ai'
+MAXIMUM_MESSAGES = 8
+
+def chunk_tokens(text, max_tokens=900):
+    tokens = tokenizer.encode(text)
+    chunks = [tokens[i:i+max_tokens] for i in range(0, len(tokens), max_tokens)]
+    return [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
+
+def q_converter(item):
+    role = "assistant" if item.user.first_name == "@ai" else "user"
+    return {"role": role, "content": item.content}
+
+def compress_history(messages_text):
+    return summarizer(messages_text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
+
+def ask_ai(query, messages, room):
+    msg_len = len(messages)
+    prev_messages = list(map(q_converter, messages))
+    room_summary = Summary.objects.filter(chatroom=room.id).order_by('-created').first()
+
+    if msg_len > MAXIMUM_MESSAGES and room_summary and room_summary.checks == MAXIMUM_MESSAGES:
+        old_text = "\n".join(m["content"] for m in prev_messages)
+        chunks = chunk_tokens(old_text)
+        summaries = [compress_history(c) for c in chunks]
+        summary = compress_history(" ".join(summaries))
+        Summary.objects.create(chatroom=room, content=summary, checks=1)
+        prev_messages = [{"role": "system", "content": f"Summary so far: {summary}"}]
+        
+    elif msg_len > MAXIMUM_MESSAGES and room_summary and room_summary.checks < MAXIMUM_MESSAGES:
+        room_summary.checks += 1
+        room_summary.save()
+        prev_messages = [{"role": "system", "content": f"Summary so far: {room_summary.content}"}] + prev_messages[-6:]
+
+    elif msg_len > MAXIMUM_MESSAGES and room_summary is None:
+        old_text = "\n".join(m["content"] for m in prev_messages)
+        chunks = chunk_tokens(old_text)
+        summaries = [compress_history(c) for c in chunks]
+        summary = compress_history(" ".join(summaries))
+        Summary.objects.create(chatroom=room, content=summary, checks=1)
+        prev_messages = [{"role": "system", "content": f"Summary so far: {summary}"}]
+
+        
+    system_msg = {
+        "role": "system",
+        "content": (
+            "You are an AI bot in this room about "
+            f"{room.title} where you provide support, "
+            "answer questions and help the discussion, "
+            "considering prior messages."
+        )
+    }
+    history = [system_msg] + prev_messages
+    history.append({"role": "user", "content": query})
+
+    client = InferenceClient(
+        provider="novita",
+        api_key=config("HF_TOKEN"),
+    )
+
+    completion = client.chat.completions.create(
+        model="meta-llama/Llama-3.1-8B-Instruct",
+        messages=history,
+    )
+
+    return completion.choices[0].message.content
 
 
 def home(request):
@@ -38,12 +110,25 @@ def room(request, pk):
         if request.user.is_authenticated == False:
             messages.error(request, 'login or register to add a message!')
             return redirect(reverse('room', args=[pk]))
-
-        if request.POST['msg'] != '' or request.POST['msg'] != None:
-            Message.objects.create(
-                user = request.user,
-                content = request.POST['msg'],
-                chatroom = room
+        
+        room_message = request.POST['msg'].strip()
+        if room_message != '' and room_message != None:
+            if TRIGGER_WORD in room_message:
+                ai_reply = ask_ai(room_message, msg, room)
+                if ai_reply:
+                    ai_user = User.objects.filter(first_name='@ai').first()
+                    Message.objects.bulk_create([
+                        Message(user=request.user, content=room_message, chatroom=room),
+                        Message(user=ai_user, content=ai_reply, chatroom=room)
+                    ])
+                else:
+                    messages.error(request, 'Something went wrong with the ai reply, please try again')
+                    return redirect(reverse('room', args=[pk]))
+            else:
+                Message.objects.create(
+                    user = request.user,
+                    content = room_message,
+                    chatroom = room
                 )
             room.participants.add(request.user)
             return redirect(reverse('room', args=[pk]))
@@ -118,7 +203,7 @@ def room_delete(request, id):
     room = Room.objects.get(id=id)
 
     if request.user.is_authenticated == False or request.user != room.host:
-        print('redirected sucker')
+        messages.error(request, "You don't have the appropriate permissions for this!")
         return redirect('home')
 
     if request.method == 'POST':
