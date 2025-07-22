@@ -1,94 +1,141 @@
-# **DiscussAI (Discord Clone)**
+# **DiscussAI — AI-Powered Chatrooms**
 
-Chatrooms is a full-stack web application that replicates Discord's core functionality, allowing users to create dedicated servers, join real-time chat channels, and communicate with other members. Built with Django for backend logic and PostgreSQL for data persistence, the application features a containerized architecture using Docker for consistent development and deployment. The project demonstrates user authentication systems, database management, environment configuration, and production-ready implementation with Gunicorn and Whitenoise for static file serving.
+DiscussAI transforms your chatrooms with an on-demand AI assistant. Users trigger the bot by mentioning **@ai** in messages, and it will thoughtfully respond. Smart summarization is built-in—used internally to manage token limits—but it's just a behind‑the‑scenes efficiency tool, not the main feature.
 
-### **1. Cloning the Repository**
+Under the hood:
+
+* **Django** powers the backend logic
+* **PostgreSQL** ensures data persistence
+* **Docker** offers containerized development and deployment
+* **Hugging Face Inference API** (using Meta LLaMA‑3.1) drives the AI assistant
+
+---
+
+### 🚀 Key Features
+
+* 🗨️ Real-time chatrooms and conversations
+* 🔍 **@ai Mention Detection**: Users type `@ai`, and the assistant jumps in
+* 🧠 **Internal Summarization**: Automatically condenses history to stay within LLM token limits
+* 🔐 Secure authentication, PostgreSQL data storage
+* ⚙️ Deployed via Docker (dev/prod) and hosted on **Render**
+
+---
+
+### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/nonso-uj/chatrooms-discord-clone.git
-cd chatrooms-discord-clone
+git clone https://github.com/nonso-uj/DiscussAI.git
+cd DiscussAI.git
 ```
 
 ---
 
-### **2. Local Setup (Without Docker)**
-#### **Create a Virtual Environment**
+### 2. Local Development (No Docker)
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate    # Windows
-```
+venv\Scripts\activate     # Windows
 
-#### **Install Dependencies**
-```bash
 pip install -r requirements.txt
-```
-
-#### **Run the App**
-```bash
 python manage.py runserver
 ```
-> ⚠ Access at: http://127.0.0.1:8000/
+
+> 📎 Visit: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
-### **3. Docker Setup (Recommended)**
-#### **Prerequisites**
-- Install [Docker](https://docs.docker.com/get-docker/)
-- Install [Docker Compose](https://docs.docker.com/compose/install/)
+### 3. Docker Setup (Recommended)
 
-#### **Steps**
-1. **Build and Start Containers**
-   ```bash
-   docker-compose build
-   docker-compose up
-   ```
-   - This will:
-     - Start a **PostgreSQL** container (`db`).
-     - Run Django migrations automatically.
-     - Start the server at `http://localhost:8000`.
+#### Requirements:
 
-2. **Optional Commands**
-   - Run migrations manually:
-     ```bash
-     docker-compose exec web python manage.py migrate
-     ```
-   - Create a superuser:
-     ```bash
-     docker-compose exec web python manage.py createsuperuser
-     ```
-   - Stop containers:
-     ```bash
-     docker-compose down
-     ```
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 
----
+#### Initialize Containers:
 
-### **4. Environment Variables**
-Create a `.env` file in the project root:
-```ini
-# PostgreSQL
-DATABASE_URL=your_database_url
+```bash
+docker-compose build
+docker-compose up
+```
 
-# Django
-SECRET_KEY=yoursecretkey
-DEBUG=1  # Set to 0 in production
+#### Helpful Commands:
+
+```bash
+docker-compose exec web python manage.py migrate
+docker-compose exec web python manage.py createsuperuser
+docker-compose down
 ```
 
 ---
 
-### **5. Access the App**
-- **Without Docker**: http://127.0.0.1:8000/
-- **With Docker**: http://localhost:8000/
+### 4. Environment Variables
+
+Create `.env` in the project root:
+
+```ini
+DATABASE_URL=postgres://...
+SECRET_KEY=your-secret-key
+DEBUG=1
+#HUGGINGFACE_API_KEY
+HF_TOKEN=hf_......
+```
 
 ---
 
-### **Troubleshooting**
-| Issue | Solution |
-|-------|----------|
-| **Docker build fails** | Check `requirements.txt` and rebuild (`docker-compose build --no-cache`). |
-| **Database connection error** | Ensure `DB_HOST=db` in Django settings. |
-| **Port already in use** | Stop other services using ports `8000` or `5432`. |
+### 5. AI Assistant Behavior
+
+* The assistant **only responds when mentioned** using `@ai` in a message.
+* Internally, older conversation messages are **summarized** to reduce token usage in API calls.
+* Summaries ensure efficient context passing to the LLaMA‑3.1 model— the summarization logic is **background optimization**, not the main user feature.
+* Users can request a summary explicitly (e.g. “@ai summarize”), but it's **not the assistant's primary duty**.
 
 ---
 
-🚀 **Happy Coding!**
+### 6. Deployment on Render
+
+* A Docker-ready `Dockerfile` and `docker-compose.yml` are provided.
+* Easily deploy by connecting your GitHub repo to Render and setting env variables.
+* Chatrooms plus AI assistant will be live without additional infra.
+
+---
+
+### 7. Troubleshooting
+
+| Issue                   | Solution                                   |
+| ----------------------- | ------------------------------------------ |
+| **Docker build errors** | Use `docker-compose build --no-cache`      |
+| **DB connection error** | Ensure `DB_HOST=db` matches docker-compose |
+| **Port conflicts**      | Free up ports 8000 or 5432                 |
+| **AI calls failing**    | Check `HUGGINGFACE_API_KEY` validity       |
+
+---
+
+### 8. Contributing & Roadmap
+
+* ✅ Pull requests welcome!
+* 💡 Roadmap:
+
+  * Smarter mention detection and handling
+  * Persistent conversation memory
+  * Optional RAG support with document uploads
+  * Personality profiles per chatroom
+
+---
+
+### 🧠 How the AI is Prompted
+
+We dynamically build the chat context:
+
+1. **System message** defines the assistant’s role in the current room.
+2. We optionally **prepend a summary** of older messages if the conversation is too long (per NLP practice, to manage tokens efficiently) ([foojay.io][1], [techradar.com][2], [knowledge.exlibrisgroup.com][3], [reddit.com][4], [neurond.com][5], [aws.amazon.com][6]).
+3. We add the **most recent few messages**, then the **user’s current input**.
+4. We send it all to LLaMA‑3.1‑8B and return the assistant’s reply.
+
+This framing strategy reflects best practices—defining system roles and including relevant context to get focused, coherent responses ([nngroup.com][7]).
+
+---
+
+### 🧾 Summary
+
+DiscussAI is not just a chat clone—it’s a **smart environment-enhanced chat experience**. With **@ai-triggered conversational responses**, behind-the-scenes summarization for efficiency, and friendly deployment on Render, it’s a showcase-ready portfolio project.
