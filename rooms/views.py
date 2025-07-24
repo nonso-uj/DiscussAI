@@ -1,19 +1,18 @@
 from django.shortcuts import render, redirect
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.urls import reverse
 from django.contrib import messages
 from django.core.paginator import Paginator
 from decouple import config
-from transformers import pipeline, AutoTokenizer
 from huggingface_hub import InferenceClient
 
 from .models import Message, Topic, Room, Summary
 from .forms import RoomForm
 from userapp.models import User
+from .ai import summarizer, tokenizer
 # Create your views here.
 
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
+
 TRIGGER_WORD = '@ai'
 MAXIMUM_MESSAGES = 8
 
@@ -30,7 +29,7 @@ def compress_history(messages_text):
     return summarizer(messages_text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
 
 def ask_ai(query, messages, room):
-    msg_len = len(messages)
+    msg_len = messages.count()
     prev_messages = list(map(q_converter, messages))
     room_summary = Summary.objects.filter(chatroom=room.id).order_by('-created').first()
 
@@ -83,13 +82,17 @@ def ask_ai(query, messages, room):
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
-    rooms = Room.objects.filter(Q(topic__title__icontains=q) | Q(title__icontains=q) | Q(description__icontains=q) | Q(host__first_name__icontains=q) | Q(host__last_name__icontains=q))
-    topics = Topic.objects.all()[:5]
+    
+    rooms = Room.objects.filter(Q(topic__title__icontains=q) | Q(title__icontains=q) | Q(description__icontains=q) | Q(host__first_name__icontains=q) | Q(host__last_name__icontains=q)).select_related('host', 'topic').prefetch_related('participants')
+
+    topics = Topic.objects.all().annotate(room_count=Count('room')).prefetch_related('room_set')[:5]
+
     room_count = rooms.count()
-    room_messages = Message.objects.filter(Q(chatroom__topic__title__icontains=q)).order_by('-created')[:5]
+
+    room_messages = Message.objects.filter(Q(chatroom__topic__title__icontains=q)).select_related('chatroom', 'chatroom__topic').order_by('-created')[:5]
+
     paginator = Paginator(rooms, 5)
-    page_number = request.GET.get('page')
-    rooms = paginator.get_page(page_number)
+    rooms = paginator.get_page(request.GET.get('page'))
 
     context = {
         'rooms': rooms,
@@ -219,8 +222,10 @@ def room_delete(request, id):
 
 
 def topics_page(request):
-    topics = Topic.objects.all()
+    topics = Topic.objects.all().annotate(room_count=Count('room'))
     room_count = Room.objects.all().count()
+    print('topics===', topics[0])
+    print('room_count===', room_count)
 
     context = {
         'topics': topics,

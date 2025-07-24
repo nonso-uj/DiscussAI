@@ -1,9 +1,13 @@
+accelerate==1.9.0
 asgiref==3.9.1
+autopep8==2.3.2
 certifi==2025.7.14
 charset-normalizer==3.4.2
 dj-database-url==3.0.1
 Django==5.2.4
+django-cors-headers==4.7.0
 django-extensions==4.1
+djangorestframework==3.16.0
 filelock==3.18.0
 fsspec==2025.7.0
 gunicorn==23.0.0
@@ -31,8 +35,11 @@ nvidia-nvjitlink-cu12==12.6.85
 nvidia-nvtx-cu12==12.6.77
 packaging==25.0
 pillow==11.3.0
+psutil==7.0.0
 psycopg2-binary==2.9.10
+pycodestyle==2.14.0
 python-decouple==3.8
+pytz==2025.2
 PyYAML==6.0.2
 regex==2024.11.6
 requests==2.32.4
@@ -41,9 +48,10 @@ setuptools==80.9.0
 sqlparse==0.5.3
 sympy==1.14.0
 tokenizers==0.21.2
+toml==0.10.2
 torch==2.7.1
 tqdm==4.67.1
-transformers==4.53.2
+transformers==4.53.3
 triton==3.3.1
 typing_extensions==4.14.1
 urllib3==2.5.0

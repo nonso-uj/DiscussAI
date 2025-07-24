@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 
     # 3rd party
     'django_extensions',
+    'silk',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 AUTH_USER_MODEL = 'userapp.User'

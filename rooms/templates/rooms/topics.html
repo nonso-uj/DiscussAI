@@ -35,7 +35,7 @@
 
                     <li>
                         <a href="{% url 'home'%}?q={{topic.title}}">
-                            {{ topic.title }} <span>{{ topic.room_set.all.count }}</span>
+                            {{ topic.title }} <span>{{ topic.room.room_count }}</span>
                         </a>
                     </li>
 
