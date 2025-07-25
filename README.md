@@ -1,4 +1,4 @@
-# **DiscussAI — AI-Powered Chatrooms**
+# **DiscussAI || AI-Powered Chatrooms**
 
 DiscussAI transforms your chatrooms with an on-demand AI assistant. Users trigger the bot by mentioning **@ai** in messages, and it will thoughtfully respond. Smart summarisation is built-in and used internally to manage token limits, but it's just a behind-the-scenes efficiency tool, not a main feature.
 
