@@ -89,7 +89,11 @@
           <div class="room__details">{{ room.description }}</div>
           <span class="room__topics">{{ room.topic }}</span>
         </div>
-        <div class="room__conversation">
+        <div
+          id="room__conversation"
+          data-room-id="{{ room.id }}"
+          class="room__conversation"
+        >
           <div
             id="room__box"
             class="threads scroll"
@@ -127,7 +131,7 @@
 
             <div class="thread">
               <div class="thread__details">
-                <h3>No Messages yet...</h3>
+                <h3>Loading Messages...</h3>
               </div>
             </div>
 
@@ -137,14 +141,21 @@
       </div>
 
       <div class="room__message">
-        <form action="" method="POST">
+        <form id="messagesForm" data-url="{% url 'room-messages' room.id %}">
           {% csrf_token %}
-          <input name="msg" placeholder="Write your message here..." />
-          <button type="submit">send</button>
+          <input
+            id="message-input"
+            name="msg"
+            placeholder="Write your message here..."
+          />
+          <button id="form-button" type="submit">send</button>
         </form>
         <div style="width: 100%; z-index: 1000; background-color: #8b8b8b">
-          <p style="color: #ffffff; font-size: x-small; text-align: center">
-            users can invoke the AI assistant by adding @ai to their messages
+          <p
+            id="sending"
+            style="color: #ffffff; font-size: x-small; text-align: center"
+          >
+            Add "@ai" to their message to invoke the AI assistant
           </p>
         </div>
       </div>
@@ -154,9 +165,12 @@
     <!--   Start -->
     <div class="participants">
       <h3 class="participants__top">
-        Participants <span> ({{room.participants.count}} Joined) </span>
+        Participants
+        <span id="participants_count">
+          ({{room.participants.count}} Joined)
+        </span>
       </h3>
-      <div class="participants__list scroll">
+      <div id="participants__list" class="participants__list scroll">
         {% for user in participants %}
         <a href="{% url 'profile' user.id %}" class="participant">
           <div class="avatar avatar--medium">

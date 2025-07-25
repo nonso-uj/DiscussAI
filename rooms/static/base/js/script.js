@@ -1,49 +1,3 @@
-// // Actions:
-
-// const closeButton = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-// <title>remove</title>
-// <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"></path>
-// </svg>
-// `;
-// const menuButton = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-// <title>ellipsis-horizontal</title>
-// <path d="M16 7.843c-2.156 0-3.908-1.753-3.908-3.908s1.753-3.908 3.908-3.908c2.156 0 3.908 1.753 3.908 3.908s-1.753 3.908-3.908 3.908zM16 1.98c-1.077 0-1.954 0.877-1.954 1.954s0.877 1.954 1.954 1.954c1.077 0 1.954-0.877 1.954-1.954s-0.877-1.954-1.954-1.954z"></path>
-// <path d="M16 19.908c-2.156 0-3.908-1.753-3.908-3.908s1.753-3.908 3.908-3.908c2.156 0 3.908 1.753 3.908 3.908s-1.753 3.908-3.908 3.908zM16 14.046c-1.077 0-1.954 0.877-1.954 1.954s0.877 1.954 1.954 1.954c1.077 0 1.954-0.877 1.954-1.954s-0.877-1.954-1.954-1.954z"></path>
-// <path d="M16 31.974c-2.156 0-3.908-1.753-3.908-3.908s1.753-3.908 3.908-3.908c2.156 0 3.908 1.753 3.908 3.908s-1.753 3.908-3.908 3.908zM16 26.111c-1.077 0-1.954 0.877-1.954 1.954s0.877 1.954 1.954 1.954c1.077 0 1.954-0.877 1.954-1.954s-0.877-1.954-1.954-1.954z"></path>
-// </svg>
-// `;
-
-// const actionButtons = document.querySelectorAll('.action-button');
-
-// if (actionButtons) {
-//   actionButtons.forEach(button => {
-//     button.addEventListener('click', () => {
-//       const buttonId = button.dataset.id;
-//       let popup = document.querySelector(`.popup-${buttonId}`);
-//       console.log(popup);
-//       if (popup) {
-//         button.innerHTML = menuButton;
-//         return popup.remove();
-//       }
-
-//       const deleteUrl = button.dataset.deleteUrl;
-//       const editUrl = button.dataset.editUrl;
-//       button.innerHTML = closeButton;
-
-//       popup = document.createElement('div');
-//       popup.classList.add('popup');
-//       popup.classList.add(`popup-${buttonId}`);
-//       popup.innerHTML = `<a href="${editUrl}">Edit</a>
-//       <form action="${deleteUrl}" method="delete">
-//         <button type="submit">Delete</button>
-//       </form>`;
-//       button.insertAdjacentElement('afterend', popup);
-//     });
-//   });
-// }
-
-// Menu
-
 const dropdownMenu = document.querySelector(".dropdown-menu");
 const dropdownButton = document.querySelector(".dropdown-button");
 
@@ -65,17 +19,158 @@ if (photoInput)
   };
 
 // Scroll to Bottom
-const conversationThread = document.querySelector(".room__box");
-if (conversationThread)
-  conversationThread.scrollTop = conversationThread.scrollHeight;
-
-
-const chat = document.getElementById('room__box');
-function scrollToBottom(){
+const chat = document.getElementById("room__box");
+function scrollToBottom() {
   chat.scrollTop = chat.scrollHeight;
-  console.log('first===', chat.scrollHeight)
 }
 
-// Scroll on initial load
-scrollToBottom();
+const sendingElement = document.getElementById("sending");
 
+document.addEventListener("DOMContentLoaded", () => {
+  const messagesElement = document.getElementById("room__conversation");
+  const roomId = messagesElement.dataset.roomId;
+  loadMessages(roomId);
+});
+
+async function loadMessages(roomId) {
+  console.log("this is runnn", roomId);
+  sendingElement.innerHTML = "Loading messages...";
+
+  try {
+    const res = await fetch(`/get-messages/${roomId}/`);
+    const data = await res.json();
+
+    if (data.success === true) {
+      const box = document.getElementById("room__box");
+      box.innerHTML = ""; // Clear existing content
+
+      const participantsBox = document.getElementById("participants__list");
+      participantsBox.innerHTML = ""; // Clear existing content
+
+      const participantsCount = document.getElementById("participants_count");
+      participantsCount.innerHTML = ""; // Clear existing content
+
+      if (data.messages.length > 0) {
+        data.messages.forEach((msg) => {
+          const thread = document.createElement("div");
+          thread.classList.add("thread");
+
+          thread.innerHTML = `
+            <div class="thread__top">
+              <div class="thread__author">
+                <a href="/profile/${msg.user.id}/" class="thread__authorInfo">
+                  <div class="avatar avatar--small">
+                    <img src="/static/base/assets/avatar.svg" />
+                  </div>
+                  <span>@${msg.user.first_name}</span>
+                </a>
+                <span class="thread__date">${msg.created}</span>
+              </div>
+            </div>
+            <div class="thread__details">${msg.content}</div>
+          `;
+
+          box.appendChild(thread);
+        });
+      } else {
+        box.innerHTML = `
+        <div class="thread">
+          <div class="thread__details">
+            <h3>No Messages yet...</h3>
+          </div>
+        </div>
+      `;
+      }
+
+      if (data.participants.length > 0) {
+        const count = data.participants_count || 0;
+        participantsCount.innerHTML = `(${count} Joined)`;
+
+        data.participants.forEach((msg) => {
+          const thread = document.createElement("a");
+          thread.classList.add("participant");
+          thread.href = "/profile/" + msg.id;
+
+          thread.innerHTML = `
+            <div class="avatar avatar--medium">
+              <img src="/static/base/assets/avatar.svg" />
+            </div>
+            <p>
+              ${msg.first_name[0].toUpperCase() + msg.first_name.slice(1)}
+              <span>@${msg.first_name}</span>
+            </p>
+          `;
+
+          participantsBox.appendChild(thread);
+        });
+      }
+
+      console.log("done!");
+      // Scroll on initial load
+      scrollToBottom();
+    } else {
+      console.error("Failed to load messages", err);
+    }
+  } catch (err) {
+    console.error("Failed to load messages", err);
+  }
+
+  sendingElement.innerHTML =
+    'Add "@ai" to their message to invoke the AI assistant';
+  sendingElement.style.color = "white";
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      if (cookie.trim().startsWith(name + "=")) {
+        cookieValue = decodeURIComponent(cookie.split("=")[1]);
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const form = document.getElementById("messagesForm");
+const formButton = document.getElementById("form-button");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const dataUrl = form.dataset.url;
+  const content = document.getElementById("message-input");
+  const messagesElement = document.getElementById("room__conversation");
+  const roomId = messagesElement.dataset.roomId;
+  formButton.disabled = true;
+  sendingElement.innerHTML = "Sending message...";
+
+  try {
+    const response = await fetch(dataUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({ message: content.value }),
+      credentials: "same-origin",
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      loadMessages(roomId);
+      document.getElementById("message-input").value = "";
+    } else {
+      console.log("Error success===");
+      sendingElement.innerHTML = "An error occured, try again!";
+      sendingElement.style.color = "red";
+    }
+
+    formButton.disabled = false;
+  } catch (error) {
+    console.log("Error===", error);
+    sendingElement.innerHTML = "An error occured, try again!";
+    sendingElement.style.color = "red";
+  }
+});

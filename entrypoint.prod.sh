@@ -7,6 +7,6 @@
 python manage.py collectstatic --noinput
 
 # uses too much memory
-# python manage.py migrate --noinput
+python manage.py migrate --noinput
 
-python -m gunicorn --bind 0.0.0.0:8000 --workers 1 chatrooms.wsgi:application
+python -m gunicorn --bind 0.0.0.0:8000 --workers 3 chatrooms.wsgi:application
