@@ -1,6 +1,6 @@
 # **DiscussAI — AI-Powered Chatrooms**
 
-DiscussAI transforms your chatrooms with an on-demand AI assistant. Users trigger the bot by mentioning **@ai** in messages, and it will thoughtfully respond. Smart summarization is built-in—used internally to manage token limits—but it's just a behind‑the‑scenes efficiency tool, not the main feature.
+DiscussAI transforms your chatrooms with an on-demand AI assistant. Users trigger the bot by mentioning **@ai** in messages, and it will thoughtfully respond. Smart summarisation is built-in and used internally to manage token limits, but it's just a behind-the-scenes efficiency tool, not a main feature.
 
 Under the hood:
 
@@ -128,11 +128,11 @@ HF_TOKEN=hf_......
 We dynamically build the chat context:
 
 1. **System message** defines the assistant’s role in the current room.
-2. We optionally **prepend a summary** of older messages if the conversation is too long (per NLP practice, to manage tokens efficiently) ([foojay.io][1], [techradar.com][2], [knowledge.exlibrisgroup.com][3], [reddit.com][4], [neurond.com][5], [aws.amazon.com][6]).
+2. We optionally **prepend a summary** of older messages if the conversation is too long using facebook/bart-large-cnn.
 3. We add the **most recent few messages**, then the **user’s current input**.
 4. We send it all to LLaMA‑3.1‑8B and return the assistant’s reply.
 
-This framing strategy reflects best practices—defining system roles and including relevant context to get focused, coherent responses ([nngroup.com][7]).
+This framing strategy reflects best practices—defining system roles and including relevant context to get focused, coherent responses.
 
 ---
 
