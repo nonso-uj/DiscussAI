@@ -75,6 +75,7 @@ Create `.env` in the project root:
 
 ```ini
 DATABASE_URL=postgres://...
+DB_HOST=host://...
 SECRET_KEY=your-secret-key
 DEBUG=1
 #HUGGINGFACE_API_KEY
