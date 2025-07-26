@@ -5,9 +5,9 @@ DiscussAI transforms your chatrooms with an on-demand AI assistant. Users trigge
 Under the hood:
 
 * **Django** powers the backend logic
-* **PostgreSQL** ensures data persistence
+* **PostgreSQL** ensures data persistence (external service to reduce docker image size)
 * **Docker** offers containerized development and deployment
-* **Hugging Face Inference API** (using Meta LLaMA‑3.1) drives the AI assistant
+* **Hugging Face Inference API** (using Meta LLaMA‑3.1) drives the AI assistant, and (facebook/bart-large-cnn) drives messages summarization
 
 ---
 
