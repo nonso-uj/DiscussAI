@@ -88,7 +88,7 @@ HF_TOKEN=hf_......
 
 * The assistant **only responds when mentioned** using `@ai` in a message.
 * Internally, older conversation messages are **summarized** to reduce token usage in API calls.
-* Summaries ensure efficient context passing to the LLaMA‑3.1 model— the summarization logic is **background optimization**, not the main user feature.
+* Summaries ensure efficient context passing to the LLaMA‑3.1 model, the summarization logic using facebook/bart-large-cnn is **background optimization**, not the main user feature.
 * Users can request a summary explicitly (e.g. “@ai summarize”), but it's **not the assistant's primary duty**.
 
 ---
@@ -139,4 +139,4 @@ This framing strategy reflects best practices—defining system roles and includ
 
 ### 🧾 Summary
 
-DiscussAI is not just a chat clone—it’s a **smart environment-enhanced chat experience**. With **@ai-triggered conversational responses**, behind-the-scenes summarization for efficiency, and friendly deployment on Render, it’s a showcase-ready portfolio project.
+DiscussAI is not just a chat clone, it’s a **smart environment-enhanced chat experience**. With **@ai-triggered conversational responses**, behind-the-scenes summarization for efficiency, and friendly deployment on Render, it’s a showcase-ready portfolio project.
